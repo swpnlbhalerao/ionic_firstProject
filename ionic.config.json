@@ -1,5 +1,7 @@
 {
   "name": "FirstIonicProject",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "angular"
 }
