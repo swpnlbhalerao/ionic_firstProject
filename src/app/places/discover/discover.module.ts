@@ -6,6 +6,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 
 import { DiscoverPage } from './discover.page';
+/* import { INRCurrencyPipe } from '../../pipes/Inr.currency.pipe' */
 
 const routes: Routes = [
   {

@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Place } from '../place.model';
 import { PlacesService } from '../places.service';
-import { NavController } from '@ionic/angular';
+import { NavController, IonItemSliding } from '@ionic/angular';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-offers',
@@ -10,14 +11,22 @@ import { NavController } from '@ionic/angular';
 })
 export class OffersPage implements OnInit {
 
-  loadedPlaces:Place[];
-  constructor(private placesService:PlacesService,private navCntrl:NavController) { }
+  offers:Place[];
+  constructor(private placesService:PlacesService,private navCntrl:NavController,private router:Router) { }
 
   ngOnInit() {
 
-    this.loadedPlaces=this.placesService.getPlaces();
-    console.log(this.loadedPlaces);
+  }
+  ionViewWillEnter() {
+    this.offers=this.placesService.getPlaces();
+
   }
 
+  onEditOffer(offerId:string,slidingItem:IonItemSliding){
+    console.log(offerId);
+    this.router.navigateByUrl('/places/tabs/offers/edit/'+offerId);
+    slidingItem.close();
+
+  }
 
 }
