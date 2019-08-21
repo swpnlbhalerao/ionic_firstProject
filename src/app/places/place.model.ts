@@ -1,3 +1,4 @@
+import { PlaceLocation } from './location.model';
 
 
 export class Place {
@@ -10,8 +11,7 @@ export class Place {
         public availableFrom:Date,
         public availableTo:Date,
         public userId:string,
-        
-        
+        public location: PlaceLocation
     ){}
 
 }

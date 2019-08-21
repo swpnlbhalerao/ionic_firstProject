@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Place } from '../../place.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlacesService } from '../../places.service';
-import { NavController, LoadingController } from '@ionic/angular';
+import { NavController, LoadingController, AlertController } from '@ionic/angular';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -17,7 +17,9 @@ export class EditOfferPage implements OnInit, OnDestroy {
   placeId:string;
   placesSub: Subscription;
   isLoading=false;
-  constructor(private route: ActivatedRoute, private placesService: PlacesService, private navCntrl: NavController, private loadingCntrl: LoadingController,private router :Router) { }
+  constructor(private route: ActivatedRoute, private placesService: PlacesService, 
+    private navCntrl: NavController, private loadingCntrl: LoadingController,
+    private router :Router,private alertController: AlertController) { }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -42,10 +44,22 @@ export class EditOfferPage implements OnInit, OnDestroy {
         })
         this.isLoading=false;
 
+      },error=>{
+          this.alertController.create({
+            header:'An error occured',
+            message:'Somethiing wen twrong !! </br> Please try again later.',
+            buttons:[{
+              text: 'OK',
+              handler:()=>{
+                this.router.navigateByUrl('/places/tabs/offers');
+              } 
+            }
+            ]
+          }).then(alertEl=>{
+            alertEl.present();
+          })
       });
     })
-
-
   }
 
   onUpdateOffer() {

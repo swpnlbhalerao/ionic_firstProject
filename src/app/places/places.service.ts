@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Place } from './place.model'
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject,of } from 'rxjs';
 import { take, map, tap,delay, switchMap } from 'rxjs/operators'
 import { HttpClient } from '@angular/common/http';
+import { PlaceLocation } from './location.model';
 
 
 interface PlacesData{
@@ -13,6 +14,7 @@ interface PlacesData{
   price: number
   title: string,
   userId: string,
+  location: PlaceLocation;
  } 
 
 
@@ -65,7 +67,8 @@ export class PlacesService {
           return new Place(id,
             responseData.title,
             responseData.desc,responseData.imageUrl,responseData.price
-            ,new Date(responseData.availableFrom),new Date(responseData.availableTo),responseData.userId);
+            ,new Date(responseData.availableFrom),new Date(responseData.availableTo),
+            responseData.userId,responseData.location);
       }));
     
     
@@ -76,10 +79,19 @@ export class PlacesService {
       })) */
     }
 
+    uploadImage(image: File) {
+      const uploadData = new FormData();
+      uploadData.append('image', image);
+  
+      return this.http.post<{imageUrl: string, imagePath: string}>(
+        'https://us-central1-ionic-angular-249706.cloudfunctions.net/storeImage',
+        uploadData
+      );
+    }
     addPlace(id: string,title: string,desc: string,imageUrl: string,price: Number,availableFrom:Date,
-      availableTo:Date,userId:string) {
-
-        const newPlace=new Place(id,title,desc,imageUrl,price,availableFrom,availableTo,userId);
+      availableTo:Date,userId:string, location: PlaceLocation) {
+        console.log('Location data..',location)
+        const newPlace=new Place(id,title,desc,imageUrl,price,availableFrom,availableTo,userId,location);
 
         return this.http.post<{name:string}>('https://ionic-angular-249706.firebaseio.com/offered-places.json',{... newPlace, id:null})
         .pipe(
@@ -113,7 +125,8 @@ export class PlacesService {
               if(responseData.hasOwnProperty(key)){
                   places.push(new Place(key,responseData[key].title,
                     responseData[key].desc,responseData[key].imageUrl,responseData[key].price,
-                    new Date(responseData[key].availableFrom),new Date(responseData[key].availableTo),responseData[key].userId))
+                    new Date(responseData[key].availableFrom),new Date(responseData[key].availableTo),
+                    responseData[key].userId ,responseData[key].location))
               }
             }
             return places;
@@ -130,12 +143,19 @@ export class PlacesService {
     updatePlace(placeId:string,title:string,description:string){
        let updatedPlaces:Place[];
          return this.places.pipe(take(1),
+          switchMap(places=>{
+            if(!places || places.length<=0){
+              return this.fetchData();
+            }else{
+              return of(places);
+            }
+          }),
             switchMap(places=>{
               const updatedPlaceIndex = places.findIndex(p => p.id === placeId)
                updatedPlaces=[... places];
               const oldplace=places[updatedPlaceIndex];
                 updatedPlaces[updatedPlaceIndex]=new Place(
-                  oldplace.id,title,description,oldplace.imageUrl,oldplace.price,oldplace.availableFrom,oldplace.availableTo,oldplace.userId)
+                  oldplace.id,title,description,oldplace.imageUrl,oldplace.price,oldplace.availableFrom,oldplace.availableTo,oldplace.userId,oldplace.location)
           
                   return this.http.put(`https://ionic-angular-249706.firebaseio.com/offered-places/${placeId}.json`, {...updatedPlaces[updatedPlaceIndex],id:null})
                 }),tap(()=>{
