@@ -1,5 +1,6 @@
+import { keys } from '../app/api-key.constant'
 export const environment = {
   production: true,
-  googleMapsAPIKey: 'AIzaSyAQyhuI7UdCxSbECiq4zyofyfsNnbiWTGs',
-  firebaseAPIKey:'AIzaSyCHQNaKrs_NFZqa8297assdtBk1-WM2aw4'
+  googleMapsAPIKey: keys.googleMapsAPIKey,
+  firebaseAPIKey: keys.firebaseAPIKey
 };

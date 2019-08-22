@@ -1,11 +1,13 @@
+import { keys } from '../app/api-key.constant'
+
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
   production: false ,
-  googleMapsAPIKey: 'AIzaSyAQyhuI7UdCxSbECiq4zyofyfsNnbiWTGs',
-  firebaseAPIKey:'AIzaSyCHQNaKrs_NFZqa8297assdtBk1-WM2aw4'
+  googleMapsAPIKey: keys.googleMapsAPIKey,
+  firebaseAPIKey: keys.firebaseAPIKey
 };
 
 /*

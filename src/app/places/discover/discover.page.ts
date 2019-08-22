@@ -4,6 +4,7 @@ import { Place } from '../place.model';
 import { SegmentChangeEventDetail } from '@ionic/core';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-discover',
@@ -46,7 +47,7 @@ export class DiscoverPage implements OnInit,OnDestroy {
    
   }
   showDataByEvent(eventType:string){
-    this.authService.userId.subscribe(userId => {
+    this.authService.userId.pipe(take(1)).subscribe(userId => {
     console.log(userId);
       if(eventType === 'all'){
       this.revelantPlaces=this.loadedPlaces;
