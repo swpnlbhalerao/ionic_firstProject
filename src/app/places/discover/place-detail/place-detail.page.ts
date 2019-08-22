@@ -8,6 +8,7 @@ import { CreatebookingComponent } from '../../../bookings/createbooking/createbo
 import { BookingsService } from '../../../bookings/bookingsService';
 import { AuthService } from 'src/app/auth/auth.service';
 import { MapModalComponent } from 'src/app/shared/map-modal/map-modal.component';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-place-detail',
@@ -25,32 +26,47 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     ,private alertCtrl:AlertController) { }
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
-      console.log(params);
-      if (!params.get('placeId')) {
+    this.route.paramMap.subscribe(paramMap => {
+      console.log(paramMap);
+      if (!paramMap.get('placeId')) {
         this.navCntrl.navigateBack('/places/tabs/discover');
         return;
       }
-      this.isLoading=true;
-      this.placesSub = this.placesService.getPlace(params.get('placeId')).subscribe(place => {
-        this.place = place;
-          if(this.place.userId !== this.authService.userId){
-            this.isBookable=true;
+      this.isLoading = true;
+      let fetchedUserId: string;
+      this.authService.userId
+        .pipe(switchMap(userId => {
+            if (!userId) {
+              throw new Error('Found no user!');
+            }
+            fetchedUserId = userId;
+            return this.placesService.getPlace(paramMap.get('placeId'));
+          })
+        )
+        .subscribe(
+          place => {
+            this.place = place;
+            this.isBookable = place.userId !== fetchedUserId;
+            this.isLoading = false;
+          },
+          error => {
+            this.alertCtrl
+              .create({
+                header: 'An error ocurred!',
+                message: 'Could not load place.',
+                buttons: [
+                  {
+                    text: 'Okay',
+                    handler: () => {
+                      this.router.navigate(['/places/tabs/discover']);
+                    }
+                  }
+                ]
+              })
+              .then(alertEl => alertEl.present());
           }
-          this.isLoading=false;
-      },error=>{
-        this.alertCtrl.create({
-          header:'An error occurred.',
-          message:'Please try again later',
-          buttons:[{text:'Okay'
-         ,handler:()=>{
-           this.router.navigateByUrl('/places/tabs/discover');
-         }}]
-        }).then(alertEl=>{
-          alertEl.present();
-        })
-      });
-    })
+        );
+    });
   }
 
   onBookPlace() {

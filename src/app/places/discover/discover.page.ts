@@ -46,7 +46,9 @@ export class DiscoverPage implements OnInit,OnDestroy {
    
   }
   showDataByEvent(eventType:string){
-    if(eventType === 'all'){
+    this.authService.userId.subscribe(userId => {
+    console.log(userId);
+      if(eventType === 'all'){
       this.revelantPlaces=this.loadedPlaces;
       this.listLoadedPlaces=this.revelantPlaces.slice(1);
       }else{
@@ -54,12 +56,13 @@ export class DiscoverPage implements OnInit,OnDestroy {
         console.log(this.loadedPlaces);
 
         this.revelantPlaces=this.loadedPlaces.filter(place=>{
-          return place.userId !==  this.authService.userId
+          return place.userId !== userId
         })
         this.listLoadedPlaces=this.revelantPlaces.slice(1);
         console.log(this.revelantPlaces);
 
       }
+    });
   }
 
 

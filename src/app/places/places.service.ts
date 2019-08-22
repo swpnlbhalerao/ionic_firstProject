@@ -4,6 +4,7 @@ import { BehaviorSubject,of } from 'rxjs';
 import { take, map, tap,delay, switchMap } from 'rxjs/operators'
 import { HttpClient } from '@angular/common/http';
 import { PlaceLocation } from './location.model';
+import { AuthService } from '../auth/auth.service';
 
 
 interface PlacesData{
@@ -21,38 +22,7 @@ interface PlacesData{
 @Injectable({
   providedIn: 'root'
 })
-/* 
-[
-  new Place(
-    'p1',
-    'mumbai south',
-    'cool place to hangout',
-    'http://citizenmatters.in/wp-content/uploads/sites/2/2019/04/settlements-south-mumbai-678x381.jpg',
-    1000,
-    new Date('2019-01-01'),
-    new Date('2019-12-31'),
-    'abc'
-  ),new Place(
-    'p2',
-    'mumbai east',
-    'cool place to hangout',
-    'https://img.staticmb.com/mbphoto/property/cropped_images/2019/Apr/03/Photo_h180_w240/41109775_10_main_180_240.jpg',
-    1000,
-    new Date('2019-01-01'),
-    new Date('2019-12-31'),
-    'lmn'
- 
-  ),new Place(
-    'p3',
-    'mumbai west',
-    'cool place to hangout',
-    'https://cdnspimgsulekhalive.azureedge.net/cdn/images/property/project/detail/sahajanand-arista-in-goregaon%20west-mumbai-projectpicture_20160718051541961575.png',
-    1000,   
-    new Date('2019-01-01'),
-    new Date('2019-12-31'),
-    'abc'
-  ),
-] */
+
 export class PlacesService {
     generatedId:string;
     _places = new BehaviorSubject<Place[]>([]);
@@ -88,20 +58,43 @@ export class PlacesService {
         uploadData
       );
     }
-    addPlace(id: string,title: string,desc: string,imageUrl: string,price: Number,availableFrom:Date,
-      availableTo:Date,userId:string, location: PlaceLocation) {
-        console.log('Location data..',location)
-        const newPlace=new Place(id,title,desc,imageUrl,price,availableFrom,availableTo,userId,location);
-
-        return this.http.post<{name:string}>('https://ionic-angular-249706.firebaseio.com/offered-places.json',{... newPlace, id:null})
-        .pipe(
-          switchMap(responseData=>{
-            this.generatedId=responseData.name
+    addPlace(title: string,desc: string,imageUrl: string,price: Number,availableFrom:Date,
+      availableTo:Date, location: PlaceLocation) {
+       let generatedId: string;
+        let newPlace: Place;
+        return this.authService.userId.pipe(
+          take(1),
+          switchMap(userId => {
+            if (!userId) {
+              throw new Error('No user found!');
+            }
+            newPlace = new Place(
+              Math.random().toString(),
+              title,
+              desc,
+              imageUrl,
+              price,
+              availableFrom,
+              availableTo,
+              userId,
+              location
+            );
+            return this.http.post<{ name: string }>(
+              'https://ionic-angular-249706.firebaseio.com/offered-places.json',
+              {
+                ...newPlace,
+                id: null
+              }
+            );
+          }),
+          switchMap(resData => {
+            generatedId = resData.name;
             return this.places;
-          }),take(1),
-          tap(places=>{
-             newPlace.id=this.generatedId;
-             this._places.next(places.concat(newPlace))
+          }),
+          take(1),
+          tap(places => {
+            newPlace.id = generatedId;
+            this._places.next(places.concat(newPlace));
           })
         );
         /* 
@@ -190,6 +183,6 @@ export class PlacesService {
           ); */
         }
    
-  constructor(private http:HttpClient) { }
+        constructor(private authService: AuthService, private http: HttpClient) {}
 }
   

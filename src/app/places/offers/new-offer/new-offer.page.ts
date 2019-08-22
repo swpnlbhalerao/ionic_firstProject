@@ -102,16 +102,15 @@ export class NewOfferPage implements OnInit {
       this.placeService.uploadImage(this.form.get('image').value).pipe(
         switchMap(uploadResp=>{
           console.log(uploadResp);
-          return  this.placeService.addPlace(Math.random.toString(), this.form.value.title,
+          return  this.placeService.addPlace(this.form.value.title,
           this.form.value.description,uploadResp.imageUrl, this.form.value.price, this.form.value.fromDate,
-          this.form.value.toDate, this.authService.userId,  this.form.value.location)
+          this.form.value.toDate,this.form.value.location)
         })
       ).subscribe(() => {
           loadingEl.dismiss();
           this.form.reset();
           this.router.navigateByUrl('/places/tabs/offers');
         });
-
     })
   }
 }
